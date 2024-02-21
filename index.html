@@ -22,6 +22,10 @@
         const ULTRAVIOLET = "#63458A";
         const VERONICA = "#9A48D0";
 
+        const BLACK = "#000000";
+        const GRAY = "#464646";
+        const LIGHTGRAY = "#7A7A7A"
+
         document.body.style.fontFamily = "Inter, sans-serif"
 
         // Body Style
@@ -105,6 +109,10 @@
         sendImage.src = "resources/send.png"
         sendImage.style.width = "100%";
         
+        const sendImageDark = document.createElement("img");
+        sendImage.src = "resources/send-derechos.png"
+        sendImage.style.width = "100%";
+
         const sendButton = document.createElement("button");
         sendButton.appendChild(sendImage);
         sendButton.style.width = "3%";
@@ -122,10 +130,20 @@
         const messagesContainer = document.getElementById("MessagesContainer")
         messagesContainer.style.backgroundColor = POMPANDPOWER;
 
+        switchTheme();
         getMessages();
         
-        
         // Functions
+        themeButton.onclick = function() {
+            if (localStorage.getItem("theme") == "dark") {
+                localStorage.setItem("theme", "light")
+            } else {
+                localStorage.setItem("theme", "dark");
+            }
+            console.log(localStorage.getItem("theme"))
+            switchTheme();
+        }
+
         sendButton.onclick = function() {
             let nameText = nameInput.value;
             let messageText = messageInput.value;
@@ -186,10 +204,10 @@
                 if (serverAnswer.ok) {
                     const messagesJson = await serverAnswer.json();
                     messagesContainer.innerHTML = ""
+                    
                     messagesJson.forEach(element => {
                         boxGenerator(element.username, element.message, element.created_at, element.id);
                     });
-                    document.body.scrollTop = document.body.scrollHeight;
                     
                 } else {
                     console.log("No se pudieron obtener los mensajes.")
@@ -202,7 +220,8 @@
 
         function boxGenerator(nameShow, messageShow, timestampShow, idCheck) {
             const messageBox = document.createElement("div");
-            messageBox.style.backgroundColor = AFRICANVIOLET;
+
+            
             messageBox.style.display = "flex";
             messageBox.style.borderRadius = "10px";
             messageBox.style.padding = "2%";
@@ -215,15 +234,23 @@
             
             const usernameBox = document.createElement("p");
             usernameBox.textContent = nameShow;
-            usernameBox.style.color = ULTRAVIOLET;
-
+            
             const message = document.createElement("p");
             message.textContent = messageShow;
-
+            
             const time = document.createElement("p");
             time.textContent = timestampShow;
             time.style.alignSelf = "flex-end";
-            time.style.color = ULTRAVIOLET;
+            
+            if (localStorage.getItem("theme") == "light") {
+                messageBox.style.backgroundColor = AFRICANVIOLET;
+                time.style.color = ULTRAVIOLET;
+                usernameBox.style.color = ULTRAVIOLET;
+            } else {
+                messageBox.style.backgroundColor = GRAY;
+                time.style.color = VERONICA;
+                usernameBox.style.color = "white";
+            }
 
             messageBox.appendChild(usernameBox);
             messageBox.appendChild(message);
@@ -232,6 +259,36 @@
             messagesContainer.insertBefore(messageBox, messagesContainer.firstChild);
         }
 
+        function switchTheme() {
+            if (localStorage.getItem("theme") == "dark") {
+                header.style.backgroundColor = BLACK;
+                nameInput.style.backgroundColor = GRAY;
+                themeButton.style.backgroundColor = "#7A7A7A";
+                document.body.style.backgroundColor = BLACK;
+                messagesContainer.style.backgroundColor = BLACK;
+                messageInput.style.backgroundColor = BLACK;
+                sendButton.style.backgroundColor = BLACK;
+                sendButton.appendChild(sendImageDark);
+                getMessages();
+            } else {
+                header.style.backgroundColor = ULTRAVIOLET;
+                nameInput.style.backgroundColor = PINKLAVENDER;
+                themeButton.style.backgroundColor = "#E4B7E5";
+                document.body.style.backgroundColor = POMPANDPOWER;
+                messagesContainer.style.backgroundColor = POMPANDPOWER;
+                messageInput.style.backgroundColor = ULTRAVIOLET;
+                sendButton.style.backgroundColor = PINKLAVENDER;
+                sendButton.appendChild(sendImage);
+                getMessages();
+            }
+        }
+        
+        function scrollToDivBottom() {
+            setTimeout(() => {
+                div.scrollTop = div.scrollHeight;
+            }, 0);
+        }
+        
         let intervaloID = setInterval(getMessages, 5000); 
     </script>
 </body>
