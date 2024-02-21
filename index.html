@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+</head>
+<body>
+    <script type="application/javascript">
+        let ACTUALJSONLENGTH = 0;
+        let LOCALMESSAGES = [];
+
+        // Server Json URL
+        const URL = "https://chat.arpanetos.lol/messages"
+
+        // Color Palette from lightest to darkest
+        const PINKLAVENDER = "#E4B7E5";
+        const AFRICANVIOLET = "#B288C0";
+        const POMPANDPOWER = "#8B66A5"
+        const ROYALPURPLE = "#7E5A9B";
+        const ULTRAVIOLET = "#63458A";
+        const VERONICA = "#9A48D0";
+
+        document.body.style.fontFamily = "Inter, sans-serif"
+
+        // Body Style
+        document.body.style.backgroundColor = POMPANDPOWER;
+        document.body.style.overflowX = 'hidden';
+        document.body.style.marginTop = "6%";
+        document.body.style.marginBottom = "6%";
+
+        // Top Bar
+        const header = document.createElement("header");
+        header.style.display = "flex";
+        header.style.flexFlow = "row wrap";
+        header.style.justifyContent = "space-between";
+        header.style.backgroundColor = ULTRAVIOLET;
+        header.style.alignContent = "center";
+        header.style.position = "fixed";
+        header.style.top = "0";
+        header.style.width = "100%";
+        header.style.height = "10%";
+        header.style.marginBottom = "2%"
+
+        const chatTitle = document.createElement("h1");
+        chatTitle.textContent = "Chat - Arpanetos.lol";
+        chatTitle.style.fontSize = "25px";
+        chatTitle.style.color = "white";
+
+        const nameInput = document.createElement("input");
+        nameInput.placeholder = "Ingresa tu nombre";
+        nameInput.style.marginLeft = "3%";
+        nameInput.style.backgroundColor = PINKLAVENDER;
+        nameInput.style.border = "2px solid #E4B7E5";
+        nameInput.style.fontSize = "100%";
+        nameInput.style.color = "black";
+        nameInput.style.borderRadius = "10px";
+        nameInput.autocomplete = "on";
+
+        
+        const themeImage = document.createElement("img");
+        themeImage.src = "resources/brightness.png";
+        themeImage.alt = "Alternar Modo"
+        themeImage.style.width = "30px";
+        
+        const themeButton = document.createElement("button");
+        themeButton.style.marginRight = "3%";
+        themeButton.appendChild(themeImage);
+        themeButton.style.borderRadius = "10px";
+        themeButton.style.backgroundColor = PINKLAVENDER;
+        themeButton.style.border = "2px solid #E4B7E5";
+        
+        document.body.appendChild(header);
+        header.appendChild(nameInput);
+        header.appendChild(chatTitle);
+        header.appendChild(themeButton);
+        
+        // Message Bar
+        const footer = document.createElement("footer");
+        footer.style.display = "flex";
+        footer.style.flexFlow = "row wrap";
+        footer.style.justifyContent = "center";
+        footer.style.backgroundColor = "transparent";
+        footer.style.position = "fixed";
+        footer.style.bottom = "0";
+        footer.style.width = "100%";
+        footer.style.height = "5%";
+        footer.style.marginBottom = "2%"
+        
+        const messageInput = document.createElement("input");
+        messageInput.style.width = "90%";
+        messageInput.style.height = "100%";
+        messageInput.style.borderRadius = "10px";
+        messageInput.style.border = "2px solid #63458A";
+        messageInput.style.backgroundColor = ULTRAVIOLET;
+        messageInput.maxLength = "140";
+        messageInput.placeholder = "Mensaje";
+        messageInput.style.fontSize = "100%";
+        messageInput.style.color = "white";
+        messageInput.spellcheck = "true";
+        messageInput.style.padding = "6px";
+        
+        const sendImage = document.createElement("img");
+        sendImage.src = "resources/send.png"
+        sendImage.style.width = "100%";
+        
+        const sendButton = document.createElement("button");
+        sendButton.appendChild(sendImage);
+        sendButton.style.width = "3%";
+        sendButton.style.border = "2px solid #E4B7E5"
+        sendButton.style.borderRadius = "10px";
+        sendButton.style.backgroundColor = PINKLAVENDER;
+        sendButton.style.padding = "6px";
+        sendButton.style.marginLeft = "1%";
+        
+        document.body.appendChild(footer);
+        footer.appendChild(messageInput);
+        footer.appendChild(sendButton)
+        
+        // Messages Display
+        getMessages();
+        let intervaloID = setInterval(getMessages, 5000); 
+        
+        // Functions
+        sendButton.onclick = function() {
+            let nameText = nameInput.value;
+            let messageText = messageInput.value;
+
+            if (nameText != "") {
+                    const message = {
+                        username: nameText,
+                        message: messageText
+                    };
+
+                    fetch(URL, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(message)
+                    })
+
+                    console.log("Enviado");
+
+            } else {
+                alert("Ingresa un nombre de usuario.");
+            }
+        }
+
+        messageInput.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                let nameText = nameInput.value;
+            let messageText = messageInput.value;
+
+            if (nameText != "") {
+                    const message = {
+                        username: nameText,
+                        message: messageText
+                    };
+
+                    fetch(URL, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(message)
+                    })
+
+                    console.log("Enviado");
+
+            } else {
+                alert("Ingresa un nombre de usuario.");
+            }
+            }
+        })
+
+        async function getMessages() {
+            try {
+                let serverAnswer = await fetch(URL, {
+                    method:"GET",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                if (serverAnswer.ok) {
+                    let messagesJson = await serverAnswer.json();
+                    ACTUALJSONLENGTH = messagesJson.length;
+                    console.log(messagesJson);
+
+                    console.log(ACTUALJSONLENGTH);
+
+                    messagesJson.forEach(element => {
+                        let id = element.id;
+                        let username = element.username;
+                        let message = element.message;
+                        let timestamp = element.created_at;
+                        console.log(id);
+                        console.log(username);
+                        console.log(message);
+                        console.log(timestamp);
+                        boxGenerator(username, message, timestamp, id);
+                    });
+
+                } else {
+                    console.log("No se pudieron obtener los mensajes.")
+                }
+            } catch (error) {
+                console.log(error)
+            }
+        }
+
+        function boxGenerator(nameShow, messageShow, timestampShow, idCheck) {
+            if (LOCALMESSAGES.includes(idCheck)) {
+                console.log("Estoy aqui")
+                return;
+            }
+
+            LOCALMESSAGES.push(idCheck);
+
+            const messageBox = document.createElement("div");
+            messageBox.style.backgroundColor = AFRICANVIOLET;
+            messageBox.style.display = "flex";
+            messageBox.style.borderRadius = "10px";
+            messageBox.style.padding = "2%";
+            messageBox.style.height = 'auto';
+            messageBox.style.flexDirection = 'column';
+            messageBox.style.marginBottom = '10px'; 
+            messageBox.style.alignItems = 'flex-start';
+            messageBox.style.width = 'auto';
+            messageBox.style.flexWrap = 'nowrap';
+            
+            const usernameBox = document.createElement("p");
+            usernameBox.textContent = nameShow;
+            usernameBox.style.color = ULTRAVIOLET;
+
+            const message = document.createElement("p");
+            message.textContent = messageShow;
+
+            const time = document.createElement("p");
+            time.textContent = timestampShow;
+            time.style.alignSelf = "flex-end";
+            time.style.color = ULTRAVIOLET;
+
+            document.body.appendChild(messageBox);
+            messageBox.appendChild(usernameBox);
+            messageBox.appendChild(message);
+            messageBox.appendChild(time);
+
+            document.body.insertBefore(messageBox, document.body.firstChild);
+    }
+        </script>
+</body>
+</html>
