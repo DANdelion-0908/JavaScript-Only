@@ -6,7 +6,8 @@
     <title>Chat</title>
 </head>
 <body>
-    <script type="application/javascript">
+    <div id="MessagesContainer"></div>
+    <script>
         let ACTUALJSONLENGTH = 0;
         let LOCALMESSAGES = [];
 
@@ -118,8 +119,11 @@
         footer.appendChild(sendButton)
         
         // Messages Display
+        const messagesContainer = document.getElementById("MessagesContainer")
+        messagesContainer.style.backgroundColor = POMPANDPOWER;
+
         getMessages();
-        let intervaloID = setInterval(getMessages, 5000); 
+        
         
         // Functions
         sendButton.onclick = function() {
@@ -177,48 +181,26 @@
 
         async function getMessages() {
             try {
-                let serverAnswer = await fetch(URL, {
-                    method:"GET",
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
-                });
-
+                let serverAnswer = await fetch(URL);
+                
                 if (serverAnswer.ok) {
-                    let messagesJson = await serverAnswer.json();
-                    ACTUALJSONLENGTH = messagesJson.length;
-                    console.log(messagesJson);
-
-                    console.log(ACTUALJSONLENGTH);
-
+                    const messagesJson = await serverAnswer.json();
+                    messagesContainer.innerHTML = ""
                     messagesJson.forEach(element => {
-                        let id = element.id;
-                        let username = element.username;
-                        let message = element.message;
-                        let timestamp = element.created_at;
-                        console.log(id);
-                        console.log(username);
-                        console.log(message);
-                        console.log(timestamp);
-                        boxGenerator(username, message, timestamp, id);
+                        boxGenerator(element.username, element.message, element.created_at, element.id);
                     });
-
+                    document.body.scrollTop = document.body.scrollHeight;
+                    
                 } else {
                     console.log("No se pudieron obtener los mensajes.")
                 }
+                
             } catch (error) {
                 console.log(error)
             }
         }
 
         function boxGenerator(nameShow, messageShow, timestampShow, idCheck) {
-            if (LOCALMESSAGES.includes(idCheck)) {
-                console.log("Estoy aqui")
-                return;
-            }
-
-            LOCALMESSAGES.push(idCheck);
-
             const messageBox = document.createElement("div");
             messageBox.style.backgroundColor = AFRICANVIOLET;
             messageBox.style.display = "flex";
@@ -243,13 +225,14 @@
             time.style.alignSelf = "flex-end";
             time.style.color = ULTRAVIOLET;
 
-            document.body.appendChild(messageBox);
             messageBox.appendChild(usernameBox);
             messageBox.appendChild(message);
             messageBox.appendChild(time);
 
-            document.body.insertBefore(messageBox, document.body.firstChild);
-    }
-        </script>
+            messagesContainer.insertBefore(messageBox, messagesContainer.firstChild);
+        }
+
+        let intervaloID = setInterval(getMessages, 5000); 
+    </script>
 </body>
 </html>
